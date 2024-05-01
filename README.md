@@ -22,7 +22,7 @@ This repo may be discontinued if the changes provided are merged into the origin
 You can install the package via composer:
 
 ```bash
-composer require lanos/vapor-tenant-buckets
+composer require msucevan/vapor-tenant-buckets
 ```
 
 ## Usage
@@ -108,9 +108,16 @@ use Vidwan\TenantBuckets\Jobs\CreateTenantBucket;
 					
                 ])->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
-                })->shouldBeQueued(false),
+                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
             ],
             ...
+            Events\DeletingTenant::class => [
+                JobPipeline::make([
+                    DeleteTenantBucket::class, // <-- Place it Here if you wanna delete the bucket when delete a tenant
+                ])->send(function (Events\DeletingTenant $event) {
+                    return $event->tenant;
+                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+            ],
         ];
     }
 ```
